@@ -7,7 +7,8 @@
 // TIME CONSTANTS (change these to adjust event timing)
 // --------------------------------------------
 const HOURS = 60 * 60 * 1000; // 1 hour in milliseconds
-const EVENT_DURATION_HOURS = 72; // 3 days
+const TIME_FACTOR = 5; // Speed multiplier applied to all durations
+const EVENT_DURATION_HOURS = 72 / TIME_FACTOR; // 3 days scaled by time factor
 
 const EVENT_CONFIG = {
     // --------------------------------------------
@@ -73,7 +74,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: true,
             produces: 'sapphires',
-            spawnTime: 1000, // 1 second
+            spawnTime: 5000 / TIME_FACTOR, // 5s base
 
             maxLevel: 10,
             productionByLevel: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -102,7 +103,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: false,
             produces: 'emeralds',
-            spawnTime: 2000, // 2 seconds
+            spawnTime: 10000 / TIME_FACTOR, // 10s base
 
             maxLevel: 10,
             productionByLevel: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -131,7 +132,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: false,
             produces: 'sapphires',
-            spawnTime: 3000, // 3 seconds
+            spawnTime: 15000 / TIME_FACTOR, // 15s base
 
             maxLevel: 10,
             productionByLevel: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -160,7 +161,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: false,
             produces: 'rubies',
-            spawnTime: 4000, // 4 seconds
+            spawnTime: 20000 / TIME_FACTOR, // 20s base
 
             maxLevel: 10,
             productionByLevel: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -189,7 +190,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: false,
             produces: 'emeralds',
-            spawnTime: 5000, // 5 seconds (25s / 5)
+            spawnTime: 25000 / TIME_FACTOR, // 25s base
 
             maxLevel: 10,
             productionByLevel: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -218,7 +219,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: false,
             produces: 'rubies',
-            spawnTime: 6000, // 6 seconds (30s / 5)
+            spawnTime: 30000 / TIME_FACTOR, // 30s base
 
             maxLevel: 10,
             productionByLevel: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
