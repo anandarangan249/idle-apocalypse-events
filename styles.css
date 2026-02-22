@@ -363,6 +363,16 @@ body {
 .emeralds .resource-count { color: #44ff88; }
 .rubies .resource-count { color: #ff6666; }
 
+.resource-rate {
+    font-size: 0.35em;
+    color: #558888;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.sapphires .resource-rate { color: #2288aa; }
+.emeralds .resource-rate { color: #228855; }
+.rubies .resource-rate { color: #aa3333; }
+
 /* ============================================
    DAMAGE SECTION
    ============================================ */
@@ -399,6 +409,14 @@ body {
         0 0 8px #ff8800;
     display: block;
     animation: glow 2s ease-in-out infinite alternate;
+}
+
+.damage-rate {
+    display: block;
+    font-size: 0.4em;
+    color: #886633;
+    text-shadow: 1px 1px 0 #000;
+    margin-top: 4px;
 }
 
 @keyframes glow {

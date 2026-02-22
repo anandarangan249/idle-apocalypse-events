@@ -153,6 +153,27 @@ class IdleEventEngine {
         return config.damageByLevel[state.level - 1];
     }
 
+    getResourceRate(resourceId) {
+        let rate = 0;
+        this.config.creatures.forEach(creature => {
+            if (creature.produces !== resourceId) return;
+            const state = this.getCreatureState(creature.id);
+            if (!state.unlocked || state.level === 0) return;
+            rate += this.getCreatureProduction(creature.id) / (creature.spawnTime / 1000);
+        });
+        return rate;
+    }
+
+    getTotalDamageRate() {
+        let rate = 0;
+        this.config.creatures.forEach(creature => {
+            const state = this.getCreatureState(creature.id);
+            if (!state.unlocked || state.level === 0) return;
+            rate += this.getCreatureDamage(creature.id) / (creature.spawnTime / 1000);
+        });
+        return rate;
+    }
+
     getUpgradeCost(creatureId) {
         const config = this.getCreatureConfig(creatureId);
         const state = this.getCreatureState(creatureId);
@@ -234,6 +255,7 @@ class IdleEventEngine {
                 ${this.renderIcon(resource.icon, 'resource-icon')}
                 <span class="resource-name">${resource.name}</span>
                 <span id="${resource.id}-count" class="resource-count" style="color: ${resource.color}">0</span>
+                <span id="${resource.id}-rate" class="resource-rate">+0/s</span>
             </div>
         `).join('');
     }
@@ -303,6 +325,7 @@ class IdleEventEngine {
                 <div class="damage-display">
                     <span class="damage-label">Total Damage:</span>
                     <span id="total-damage" class="damage-value">0</span>
+                    <span id="damage-rate" class="damage-rate">+0 DPS</span>
                 </div>
                 <div class="current-tier">
                     <span class="tier-label">Current Rank:</span>
@@ -333,15 +356,21 @@ class IdleEventEngine {
     }
 
     updateUI() {
-        // Update resources
+        // Update resources and their rates
         this.config.resources.forEach(resource => {
-            const el = document.getElementById(`${resource.id}-count`);
-            if (el) el.textContent = this.formatNumber(this.state.resources[resource.id]);
+            const countEl = document.getElementById(`${resource.id}-count`);
+            if (countEl) countEl.textContent = this.formatNumber(this.state.resources[resource.id]);
+
+            const rateEl = document.getElementById(`${resource.id}-rate`);
+            if (rateEl) rateEl.textContent = '+' + this.formatNumber(this.getResourceRate(resource.id)) + '/s';
         });
 
-        // Update damage
+        // Update damage and DPS
         const damageEl = document.getElementById('total-damage');
         if (damageEl) damageEl.textContent = this.formatNumber(this.state.totalDamage);
+
+        const dpsEl = document.getElementById('damage-rate');
+        if (dpsEl) dpsEl.textContent = '+' + this.formatNumber(this.getTotalDamageRate()) + ' DPS';
 
         // Update rank
         const currentRank = this.getCurrentRank();
