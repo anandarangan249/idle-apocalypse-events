@@ -243,6 +243,92 @@ const EVENT_CONFIG = {
     ],
 
     // --------------------------------------------
+    // SHOP BOOSTS
+    // --------------------------------------------
+    boosts: [
+        {
+            id: 'sapphire-boost',
+            name: 'Sapphire Boost',
+            description: 'Champions drop more Sapphires.',
+            icon: 'icons/Sapphire_Boost_icon.png',
+            type: 'production-bonus',
+            resource: 'sapphires',
+            maxLevel: 5,
+            bonusByLevel: [1, 2, 3, 4, 5],
+            costs: [
+                { emeralds: 100 },           // Level 1
+                { sapphires: 1000 },         // Level 2
+                { emeralds: 2500 },          // Level 3
+                { rubies: 1000 },            // Level 4
+                { emeralds: 10000 }          // Level 5
+            ]
+        },
+        {
+            id: 'emerald-boost',
+            name: 'Emerald Boost',
+            description: 'Champions drop more Emeralds.',
+            icon: 'icons/Emerald_Boost_icon.png',
+            type: 'production-bonus',
+            resource: 'emeralds',
+            maxLevel: 5,
+            bonusByLevel: [1, 2, 3, 4, 5],
+            costs: [
+                { sapphires: 500 },          // Level 1
+                { emeralds: 1000 },          // Level 2
+                { rubies: 500 },             // Level 3
+                { sapphires: 15000 },        // Level 4
+                { rubies: 5000 }             // Level 5
+            ]
+        },
+        {
+            id: 'ruby-boost',
+            name: 'Ruby Boost',
+            description: 'Champions drop more Rubies.',
+            icon: 'icons/Ruby_Boost_icon.png',
+            type: 'production-bonus',
+            resource: 'rubies',
+            maxLevel: 3,
+            bonusByLevel: [1, 2, 3],
+            costs: [
+                { rubies: 500 },             // Level 1
+                { emeralds: 25000 },         // Level 2
+                { sapphires: 75000 }         // Level 3
+            ]
+        },
+        {
+            id: 'champion-speed',
+            name: 'Champion Speed',
+            description: 'Champions produce faster.',
+            icon: 'icons/Champion_Speed_icon.png',
+            type: 'speed',
+            maxLevel: 5,
+            bonusByLevel: [0.05, 0.10, 0.15, 0.20, 0.25],
+            costs: [
+                { sapphires: 10000 },        // Level 1
+                { emeralds: 25000 },         // Level 2
+                { rubies: 15000 },           // Level 3
+                { sapphires: 100000 },       // Level 4
+                { emeralds: 100000 }         // Level 5
+            ]
+        },
+        {
+            id: 'champion-damage',
+            name: 'Champion Damage',
+            description: 'Champions do more damage.',
+            icon: 'icons/Champion_Damage_icon.png',
+            type: 'damage',
+            maxLevel: 4,
+            bonusByLevel: [0.25, 0.50, 0.75, 1.00],
+            costs: [
+                { sapphires: 25000 },        // Level 1
+                { emeralds: 50000 },         // Level 2
+                { rubies: 25000 },           // Level 3
+                { sapphires: 200000 }        // Level 4
+            ]
+        }
+    ],
+
+    // --------------------------------------------
     // GAME SETTINGS
     // --------------------------------------------
     settings: {

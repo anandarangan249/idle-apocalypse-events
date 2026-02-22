@@ -9,6 +9,7 @@ class IdleEventEngine {
         this.config = config;
         this.state = this.createInitialState();
         this.creatureStates = this.createCreatureStates();
+        this.boostStates = this.createBoostStates();
         this.intervals = [];
         this.isRunning = false;
     }
@@ -40,6 +41,16 @@ class IdleEventEngine {
                 currentProgress: 0
             };
         });
+        return states;
+    }
+
+    createBoostStates() {
+        const states = {};
+        if (this.config.boosts) {
+            this.config.boosts.forEach(boost => {
+                states[boost.id] = { level: 0 };
+            });
+        }
         return states;
     }
 
@@ -143,14 +154,14 @@ class IdleEventEngine {
         const config = this.getCreatureConfig(creatureId);
         const state = this.getCreatureState(creatureId);
         if (!state.unlocked || state.level === 0) return 0;
-        return config.productionByLevel[state.level - 1];
+        return config.productionByLevel[state.level - 1] + this.getProductionBonus(config.produces);
     }
 
     getCreatureDamage(creatureId) {
         const config = this.getCreatureConfig(creatureId);
         const state = this.getCreatureState(creatureId);
         if (!state.unlocked || state.level === 0) return 0;
-        return config.damageByLevel[state.level - 1];
+        return Math.floor(config.damageByLevel[state.level - 1] * this.getDamageMultiplier());
     }
 
     getResourceRate(resourceId) {
@@ -159,7 +170,7 @@ class IdleEventEngine {
             if (creature.produces !== resourceId) return;
             const state = this.getCreatureState(creature.id);
             if (!state.unlocked || state.level === 0) return;
-            rate += this.getCreatureProduction(creature.id) / (creature.spawnTime / 1000);
+            rate += this.getCreatureProduction(creature.id) / (this.getEffectiveSpawnTime(creature) / 1000);
         });
         return rate;
     }
@@ -169,9 +180,88 @@ class IdleEventEngine {
         this.config.creatures.forEach(creature => {
             const state = this.getCreatureState(creature.id);
             if (!state.unlocked || state.level === 0) return;
-            rate += this.getCreatureDamage(creature.id) / (creature.spawnTime / 1000);
+            rate += this.getCreatureDamage(creature.id) / (this.getEffectiveSpawnTime(creature) / 1000);
         });
         return rate;
+    }
+
+    // ============================================
+    // BOOST SYSTEM
+    // ============================================
+
+    getBoostConfig(boostId) {
+        return this.config.boosts ? this.config.boosts.find(b => b.id === boostId) : null;
+    }
+
+    getBoostState(boostId) {
+        return this.boostStates[boostId];
+    }
+
+    getProductionBonus(resourceId) {
+        if (!this.config.boosts) return 0;
+        let bonus = 0;
+        this.config.boosts.forEach(boost => {
+            if (boost.type === 'production-bonus' && boost.resource === resourceId) {
+                const level = this.boostStates[boost.id]?.level || 0;
+                if (level > 0) bonus = boost.bonusByLevel[level - 1];
+            }
+        });
+        return bonus;
+    }
+
+    getSpeedMultiplier() {
+        if (!this.config.boosts) return 1;
+        const speedBoost = this.config.boosts.find(b => b.type === 'speed');
+        if (!speedBoost) return 1;
+        const level = this.boostStates[speedBoost.id]?.level || 0;
+        if (level === 0) return 1;
+        return 1 - speedBoost.bonusByLevel[level - 1];
+    }
+
+    getDamageMultiplier() {
+        if (!this.config.boosts) return 1;
+        const dmgBoost = this.config.boosts.find(b => b.type === 'damage');
+        if (!dmgBoost) return 1;
+        const level = this.boostStates[dmgBoost.id]?.level || 0;
+        if (level === 0) return 1;
+        return 1 + dmgBoost.bonusByLevel[level - 1];
+    }
+
+    getEffectiveSpawnTime(creature) {
+        return creature.spawnTime * this.getSpeedMultiplier();
+    }
+
+    getBoostUpgradeCost(boostId) {
+        const config = this.getBoostConfig(boostId);
+        if (!config) return null;
+        const state = this.getBoostState(boostId);
+        if (state.level >= config.maxLevel) return null;
+        return config.costs[state.level];
+    }
+
+    upgradeBoost(boostId) {
+        const cost = this.getBoostUpgradeCost(boostId);
+        if (!cost || !this.canAfford(cost)) return false;
+        this.spendResources(cost);
+        this.boostStates[boostId].level++;
+        this.updateUI();
+        this.saveGame();
+        return true;
+    }
+
+    getBoostEffectText(boost, level) {
+        if (level === 0) return 'Not purchased';
+        if (boost.type === 'production-bonus') {
+            const resourceName = boost.resource.charAt(0).toUpperCase() + boost.resource.slice(1);
+            return `+${boost.bonusByLevel[level - 1]} ${resourceName} per spawn`;
+        }
+        if (boost.type === 'speed') {
+            return `-${boost.bonusByLevel[level - 1] * 100}% spawn time`;
+        }
+        if (boost.type === 'damage') {
+            return `+${boost.bonusByLevel[level - 1] * 100}% damage`;
+        }
+        return '-';
     }
 
     getUpgradeCost(creatureId) {
@@ -215,8 +305,9 @@ class IdleEventEngine {
 
         state.currentProgress += deltaTime;
 
-        while (state.currentProgress >= config.spawnTime) {
-            state.currentProgress -= config.spawnTime;
+        const effectiveSpawnTime = this.getEffectiveSpawnTime(config);
+        while (state.currentProgress >= effectiveSpawnTime) {
+            state.currentProgress -= effectiveSpawnTime;
 
             // Produce resources
             const production = this.getCreatureProduction(creatureId);
@@ -276,7 +367,7 @@ class IdleEventEngine {
                         <h3>${creature.name}</h3>
                         <p class="creature-level">LV <span id="${creature.id}-level">${state.level}</span>/${creature.maxLevel}</p>
                         <p class="creature-production">
-                            +<span id="${creature.id}-production">0</span> ${this.getResourceIcon(creature.produces)} /${creature.spawnTime / 1000}s
+                            +<span id="${creature.id}-production">0</span> ${this.getResourceIcon(creature.produces)} /<span id="${creature.id}-spawn-time">${creature.spawnTime / 1000}s</span>
                         </p>
                         <p class="creature-damage">
                             DMG: <span id="${creature.id}-damage">0</span>
@@ -290,6 +381,38 @@ class IdleEventEngine {
                     ${btnText}<br>
                     <span id="${creature.id}-cost">-</span>
                 </button>
+            </div>
+        `;
+    }
+
+    renderBoostCard(boost) {
+        const state = this.boostStates[boost.id];
+        const cost = this.getBoostUpgradeCost(boost.id);
+        const isMax = state.level >= boost.maxLevel;
+
+        const pips = Array.from({length: boost.maxLevel}, (_, i) =>
+            `<span class="level-pip${i < state.level ? ' filled' : ''}"></span>`
+        ).join('');
+
+        return `
+            <div class="boost-card" id="${boost.id}-card">
+                <div class="boost-icon-frame">
+                    ${boost.icon ? this.renderIcon(boost.icon, 'boost-icon-img') : '<span class="boost-icon-fallback">⚡</span>'}
+                </div>
+                <div class="boost-body">
+                    <div class="boost-header-row">
+                        <span class="boost-name">${boost.name}</span>
+                        <div class="boost-pips" id="${boost.id}-pips">${pips}</div>
+                    </div>
+                    <p class="boost-desc">${boost.description}</p>
+                    <p id="${boost.id}-effect" class="boost-effect">${this.getBoostEffectText(boost, state.level)}</p>
+                </div>
+                <div class="boost-action">
+                    <button id="${boost.id}-btn" class="boost-buy-btn${isMax ? ' max-level' : ''}" ${isMax || !this.canAfford(cost) ? 'disabled' : ''}>
+                        ${isMax ? 'MAX' : 'BUY'}
+                    </button>
+                    <span id="${boost.id}-cost" class="boost-cost-label">${!isMax && cost ? this.formatCost(cost) : ''}</span>
+                </div>
             </div>
         `;
     }
@@ -344,6 +467,15 @@ class IdleEventEngine {
                 <h2>Champions</h2>
                 ${this.config.creatures.map(c => this.renderCreatureCard(c)).join('')}
             </section>
+
+            <!-- Shop Section -->
+            ${this.config.boosts ? `
+            <section class="shop-section">
+                <h2>Shop</h2>
+                <div class="boosts-list">
+                    ${this.config.boosts.map(b => this.renderBoostCard(b)).join('')}
+                </div>
+            </section>` : ''}
 
             <!-- Reward Tiers Reference -->
             <section class="rewards-section">
@@ -402,6 +534,50 @@ class IdleEventEngine {
         this.config.creatures.forEach(creature => {
             this.updateCreatureUI(creature.id);
         });
+
+        // Update shop boosts
+        this.updateBoostUI();
+    }
+
+    updateBoostUI() {
+        if (!this.config.boosts) return;
+        this.config.boosts.forEach(boost => {
+            const state = this.boostStates[boost.id];
+            const cost = this.getBoostUpgradeCost(boost.id);
+            const isMax = state.level >= boost.maxLevel;
+
+            // Update level pips
+            const pipsEl = document.getElementById(`${boost.id}-pips`);
+            if (pipsEl) {
+                pipsEl.innerHTML = Array.from({length: boost.maxLevel}, (_, i) =>
+                    `<span class="level-pip${i < state.level ? ' filled' : ''}"></span>`
+                ).join('');
+            }
+
+            // Update effect text
+            const effectEl = document.getElementById(`${boost.id}-effect`);
+            if (effectEl) effectEl.textContent = this.getBoostEffectText(boost, state.level);
+
+            // Update cost label
+            const costLabel = document.getElementById(`${boost.id}-cost`);
+            if (costLabel) {
+                costLabel.innerHTML = (!isMax && cost) ? this.formatCost(cost) : '';
+            }
+
+            // Update button
+            const btn = document.getElementById(`${boost.id}-btn`);
+            if (btn) {
+                if (isMax) {
+                    btn.textContent = 'MAX';
+                    btn.classList.add('max-level');
+                    btn.disabled = true;
+                } else {
+                    btn.textContent = 'BUY';
+                    btn.classList.remove('max-level');
+                    btn.disabled = !this.canAfford(cost);
+                }
+            }
+        });
     }
 
     updateCreatureUI(creatureId) {
@@ -438,11 +614,17 @@ class IdleEventEngine {
         // Update progress bar
         if (progressBar) {
             if (state.unlocked && state.level > 0) {
-                const progress = (state.currentProgress / config.spawnTime) * 100;
+                const progress = (state.currentProgress / this.getEffectiveSpawnTime(config)) * 100;
                 progressBar.style.width = progress + '%';
             } else {
                 progressBar.style.width = '0%';
             }
+        }
+
+        // Update spawn time display
+        const spawnTimeSpan = document.getElementById(`${creatureId}-spawn-time`);
+        if (spawnTimeSpan) {
+            spawnTimeSpan.textContent = (this.getEffectiveSpawnTime(config) / 1000).toFixed(1) + 's';
         }
 
         // Update upgrade button
@@ -518,7 +700,8 @@ class IdleEventEngine {
             totalDamage: this.state.totalDamage,
             eventStartTime: this.state.eventStartTime,
             lastSaveTime: Date.now(),
-            creatures: this.creatureStates
+            creatures: this.creatureStates,
+            boosts: this.boostStates
         };
 
         localStorage.setItem(this.getSaveKey(), JSON.stringify(saveData));
@@ -555,6 +738,18 @@ class IdleEventEngine {
                 }
             }
 
+            // Load boost states (must be before offline progress so boosts apply)
+            if (data.boosts) {
+                for (const boostId in data.boosts) {
+                    if (this.boostStates[boostId]) {
+                        this.boostStates[boostId] = {
+                            ...this.boostStates[boostId],
+                            ...data.boosts[boostId]
+                        };
+                    }
+                }
+            }
+
             // Calculate offline progress
             if (data.lastSaveTime) {
                 const offlineTime = Date.now() - data.lastSaveTime;
@@ -573,7 +768,7 @@ class IdleEventEngine {
             const state = this.getCreatureState(creature.id);
             if (!state.unlocked || state.level === 0) return;
 
-            const ticks = Math.floor(processTime / creature.spawnTime);
+            const ticks = Math.floor(processTime / this.getEffectiveSpawnTime(creature));
             const production = this.getCreatureProduction(creature.id) * ticks;
             const damage = this.getCreatureDamage(creature.id) * ticks;
 
@@ -590,6 +785,7 @@ class IdleEventEngine {
         localStorage.removeItem(this.getSaveKey());
         this.state = this.createInitialState();
         this.creatureStates = this.createCreatureStates();
+        this.boostStates = this.createBoostStates();
         this.updateUI();
     }
 
@@ -605,6 +801,14 @@ class IdleEventEngine {
                 btn.addEventListener('click', () => this.upgradeCreature(creature.id));
             }
         });
+
+        // Boost buttons
+        if (this.config.boosts) {
+            this.config.boosts.forEach(boost => {
+                const btn = document.getElementById(`${boost.id}-btn`);
+                if (btn) btn.addEventListener('click', () => this.upgradeBoost(boost.id));
+            });
+        }
 
         // Reset button
         const resetBtn = document.getElementById('reset-btn');

@@ -702,6 +702,219 @@ body {
 }
 
 /* ============================================
+   SHOP SECTION
+   ============================================ */
+
+.shop-section {
+    background: linear-gradient(180deg, #2d2200 0%, #1a1400 100%);
+    border: 4px solid #cc9900;
+    box-shadow:
+        8px 8px 0 #0a0800,
+        inset -4px -4px 0 #885500,
+        inset 4px 4px 0 #ffcc44;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.shop-section h2 {
+    text-align: center;
+    color: #ffcc44;
+    margin-bottom: 12px;
+    font-size: 0.7em;
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 2px;
+}
+
+.boosts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.boost-card {
+    background: linear-gradient(180deg, #1e1800 0%, #110e00 100%);
+    border: 3px solid #554400;
+    box-shadow:
+        4px 4px 0 #050400,
+        inset -2px -2px 0 #332800,
+        inset 2px 2px 0 #776600;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.boost-icon-frame {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #2a2000 0%, #110d00 100%);
+    border: 3px solid #665500;
+    box-shadow:
+        inset 2px 2px 0 #443300,
+        inset -2px -2px 0 #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.boost-icon-img {
+    width: 44px;
+    height: 44px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    object-fit: contain;
+}
+
+.boost-icon-fallback {
+    font-size: 1.6em;
+}
+
+.boost-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.boost-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.boost-name {
+    color: #ffcc44;
+    font-size: 0.48em;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.boost-pips {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.level-pip {
+    width: 10px;
+    height: 10px;
+    background: #221a00;
+    border: 2px solid #443300;
+    box-shadow: inset 1px 1px 0 #110d00;
+    display: inline-block;
+}
+
+.level-pip.filled {
+    background: #ffcc00;
+    border-color: #ffee66;
+    box-shadow:
+        inset 1px 1px 0 #ffff88,
+        0 0 4px rgba(255, 204, 0, 0.7);
+}
+
+.boost-desc {
+    color: #665522;
+    font-size: 0.32em;
+    line-height: 1.6;
+}
+
+.boost-effect {
+    color: #ccaa44;
+    font-size: 0.35em;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.boost-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.boost-buy-btn {
+    background: linear-gradient(180deg, #886600 0%, #553f00 100%);
+    border: 3px solid #cc9900;
+    box-shadow:
+        3px 3px 0 #221a00,
+        inset -2px -2px 0 #664400,
+        inset 2px 2px 0 #bbaa00;
+    color: #fff;
+    padding: 8px 10px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.42em;
+    cursor: pointer;
+    text-shadow: 1px 1px 0 #000;
+    transition: transform 0.1s;
+    min-width: 56px;
+    text-align: center;
+}
+
+.boost-buy-btn:hover:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow:
+        1px 1px 0 #221a00,
+        inset -2px -2px 0 #664400,
+        inset 2px 2px 0 #bbaa00;
+}
+
+.boost-buy-btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow:
+        0 0 0 #221a00,
+        inset -2px -2px 0 #664400,
+        inset 2px 2px 0 #bbaa00;
+}
+
+.boost-buy-btn:disabled {
+    background: linear-gradient(180deg, #2a2200 0%, #1a1400 100%);
+    border-color: #443300;
+    box-shadow:
+        3px 3px 0 #0a0800,
+        inset -2px -2px 0 #1a1000,
+        inset 2px 2px 0 #332800;
+    cursor: not-allowed;
+    color: #555;
+}
+
+.boost-buy-btn.max-level {
+    background: linear-gradient(180deg, #aa8800 0%, #664400 100%);
+    border-color: #ffcc00;
+    box-shadow:
+        3px 3px 0 #332200,
+        inset -2px -2px 0 #886600,
+        inset 2px 2px 0 #ccaa00;
+    cursor: default;
+    color: #fff;
+}
+
+.boost-cost-label {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.3em;
+    color: #886622;
+    text-shadow: 1px 1px 0 #000;
+    text-align: center;
+    line-height: 1.8;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 80px;
+    min-height: 1em;
+}
+
+.boost-cost-label .cost-icon {
+    width: 10px;
+    height: 10px;
+    image-rendering: pixelated;
+    vertical-align: middle;
+    margin: 0 1px;
+}
+
+/* ============================================
    REWARDS SECTION
    ============================================ */
 
