@@ -180,6 +180,64 @@ const EVENT_CONFIG = {
                 { rubies: 30000, emeralds: 10000 },            // Level 9
                 { rubies: 50000, sapphires: 25000 }            // Level 10
             ]
+        },
+        {
+            id: 'murky-mandy',
+            name: 'Murky Mandy',
+            icon: 'icons/Murky_Mandy.png',
+            description: 'A bit of a downer if truth be told.',
+
+            unlockedByDefault: false,
+            produces: 'emeralds',
+            spawnTime: 5000, // 5 seconds (25s / 5)
+
+            maxLevel: 10,
+            productionByLevel: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            damageByLevel: [10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000],
+
+            unlockCost: { rubies: 2500 },
+
+            // Upgrade costs (level 1→2, 2→3, etc.)
+            upgradeCosts: [
+                { sapphires: 25000 },                          // Level 2
+                { rubies: 2500, emeralds: 15000 },             // Level 3
+                { emeralds: 15000, sapphires: 30000 },         // Level 4
+                { rubies: 7500 },                              // Level 5
+                { sapphires: 75000 },                          // Level 6
+                { emeralds: 25000, sapphires: 50000 },         // Level 7
+                { emeralds: 50000 },                           // Level 8
+                { rubies: 30000, sapphires: 90000 },           // Level 9
+                { rubies: 40000 }                              // Level 10
+            ]
+        },
+        {
+            id: 'patches',
+            name: 'Patches',
+            icon: 'icons/Patches.png',
+            description: 'A scruffy old warlock.',
+
+            unlockedByDefault: false,
+            produces: 'rubies',
+            spawnTime: 6000, // 6 seconds (30s / 5)
+
+            maxLevel: 10,
+            productionByLevel: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            damageByLevel: [25000, 50000, 125000, 250000, 500000, 1250000, 2500000, 5000000, 12500000, 25000000],
+
+            unlockCost: { rubies: 5000 },
+
+            // Upgrade costs (level 1→2, 2→3, etc.)
+            upgradeCosts: [
+                { emeralds: 10000 },                           // Level 2
+                { sapphires: 50000 },                          // Level 3
+                { rubies: 7500, emeralds: 15000 },             // Level 4
+                { sapphires: 100000 },                         // Level 5
+                { emeralds: 30000 },                           // Level 6
+                { rubies: 30000 },                             // Level 7
+                { rubies: 25000, sapphires: 75000 },           // Level 8
+                { emeralds: 60000 },                           // Level 9
+                { rubies: 50000, sapphires: 150000 }           // Level 10
+            ]
         }
     ],
 
