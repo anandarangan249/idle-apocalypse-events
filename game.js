@@ -66,6 +66,15 @@ class IdleEventEngine {
         return Math.floor(num).toString();
     }
 
+    formatRate(num) {
+        if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
+        if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+        if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+        if (num >= 10) return num.toFixed(1);
+        return num.toFixed(2).replace(/\.?0+$/, '');
+    }
+
     formatTime(ms) {
         const totalSeconds = Math.floor(ms / 1000);
         const hours = Math.floor(totalSeconds / 3600);
@@ -494,7 +503,7 @@ class IdleEventEngine {
             if (countEl) countEl.textContent = this.formatNumber(this.state.resources[resource.id]);
 
             const rateEl = document.getElementById(`${resource.id}-rate`);
-            if (rateEl) rateEl.textContent = '+' + this.formatNumber(this.getResourceRate(resource.id)) + '/s';
+            if (rateEl) rateEl.textContent = '+' + this.formatRate(this.getResourceRate(resource.id)) + '/s';
         });
 
         // Update damage and DPS
@@ -502,7 +511,7 @@ class IdleEventEngine {
         if (damageEl) damageEl.textContent = this.formatNumber(this.state.totalDamage);
 
         const dpsEl = document.getElementById('damage-rate');
-        if (dpsEl) dpsEl.textContent = '+' + this.formatNumber(this.getTotalDamageRate()) + ' DPS';
+        if (dpsEl) dpsEl.textContent = '+' + this.formatRate(this.getTotalDamageRate()) + ' DPS';
 
         // Update rank
         const currentRank = this.getCurrentRank();
