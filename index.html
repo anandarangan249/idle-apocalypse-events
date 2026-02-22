@@ -3,16 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idle Event Game</title>
+    <title>Idle Apocalypse</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-container" class="game-container">
-        <!-- Game UI will be rendered dynamically by the engine -->
+
+    <!-- ==================== LANDING PAGE ==================== -->
+    <div id="landing-page" class="landing-page">
+        <h1 class="landing-title">Idle Apocalypse</h1>
+        <div class="event-list">
+            <button class="event-select-btn" id="other-tower-btn">Other Tower</button>
+        </div>
+    </div>
+
+    <!-- ==================== GAME VIEW (hidden until event selected) ==================== -->
+    <div id="game-container" class="game-container" style="display: none;"></div>
+
+    <!-- ==================== STORY POPUP ==================== -->
+    <div id="story-modal" class="story-modal-overlay" style="display: none;">
+        <div class="story-modal-box">
+            <h2 class="story-modal-title">Other Tower</h2>
+            <div class="story-modal-text">
+                <p>Your irritating sister, Enid, has stolen your idea and is planning to destroy the world before you get the chance to. All just to impress Mother. She must be stopped at all costs! Hire champions from the local pub to slow her down.</p>
+                <p>Hire champions using precious stones to damage Enid's tower. The more damage you do the better your rewards. Unlock Champion skins and even the Legendary Enid skin.</p>
+                <p>The event only lasts <span id="story-duration"></span>.</p>
+            </div>
+            <button id="start-event-btn" class="start-event-btn">Start Event</button>
+        </div>
     </div>
 
     <!-- Load event config first, then the engine -->
     <script src="events/otherTower.js"></script>
     <script src="game.js"></script>
+    <script>
+        let game = null;
+
+        function formatEventDuration(ms) {
+            const totalHours = ms / (60 * 60 * 1000);
+            const days = totalHours / 24;
+            if (Number.isInteger(days) && days >= 1) {
+                return days + ' day' + (days !== 1 ? 's' : '');
+            }
+            return totalHours + ' hour' + (totalHours !== 1 ? 's' : '');
+        }
+
+        document.getElementById('other-tower-btn').addEventListener('click', function () {
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+
+            game = new IdleEventEngine(EVENT_CONFIG);
+            game.initialize('game-container');
+
+            document.getElementById('story-duration').textContent =
+                formatEventDuration(EVENT_CONFIG.duration);
+
+            document.getElementById('story-modal').style.display = 'flex';
+        });
+
+        document.getElementById('start-event-btn').addEventListener('click', function () {
+            document.getElementById('story-modal').style.display = 'none';
+            game.beginEventLoop();
+        });
+    </script>
 </body>
 </html>

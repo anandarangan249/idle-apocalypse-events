@@ -45,6 +45,170 @@ body {
 }
 
 /* ============================================
+   LANDING PAGE
+   ============================================ */
+
+.landing-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 48px;
+    padding: 32px;
+}
+
+.landing-title {
+    font-size: 1.6em;
+    color: #ffcc00;
+    text-align: center;
+    text-shadow:
+        4px 4px 0 #000,
+        -2px -2px 0 #ff8800,
+        0 0 32px rgba(255, 200, 0, 0.4);
+    letter-spacing: 4px;
+    line-height: 1.6;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+.event-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+}
+
+.event-select-btn {
+    padding: 16px 32px;
+    background: linear-gradient(180deg, #4a1a6b 0%, #2d1040 100%);
+    border: 4px solid #aa44ff;
+    box-shadow:
+        8px 8px 0 #1a0a2e,
+        inset -4px -4px 0 #6b3fa0,
+        inset 4px 4px 0 #c87dff;
+    color: #fff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.75em;
+    cursor: pointer;
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 2px;
+    transition: transform 0.1s;
+    min-width: 240px;
+    text-align: center;
+}
+
+.event-select-btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow:
+        6px 6px 0 #1a0a2e,
+        inset -4px -4px 0 #6b3fa0,
+        inset 4px 4px 0 #c87dff;
+}
+
+.event-select-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow:
+        4px 4px 0 #1a0a2e,
+        inset -4px -4px 0 #6b3fa0,
+        inset 4px 4px 0 #c87dff;
+}
+
+/* ============================================
+   STORY MODAL
+   ============================================ */
+
+.story-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.story-modal-box {
+    background: linear-gradient(180deg, #1a0a2e 0%, #0d0518 100%);
+    border: 4px solid #aa44ff;
+    box-shadow:
+        12px 12px 0 #000,
+        inset -4px -4px 0 #6b3fa0,
+        inset 4px 4px 0 #c87dff,
+        0 0 48px rgba(170, 68, 255, 0.3);
+    padding: 32px 28px;
+    max-width: 560px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.story-modal-title {
+    font-size: 0.9em;
+    color: #ffcc00;
+    text-align: center;
+    text-shadow:
+        2px 2px 0 #000,
+        -1px -1px 0 #ff8800;
+    letter-spacing: 3px;
+}
+
+.story-modal-text {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.story-modal-text p {
+    font-size: 0.45em;
+    color: #ccbbee;
+    line-height: 2.2;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.story-modal-text span {
+    color: #ffcc00;
+}
+
+.start-event-btn {
+    padding: 14px 28px;
+    background: linear-gradient(180deg, #228822 0%, #115511 100%);
+    border: 4px solid #44cc44;
+    box-shadow:
+        6px 6px 0 #0a220a,
+        inset -2px -2px 0 #116611,
+        inset 2px 2px 0 #55dd55;
+    color: #fff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.6em;
+    cursor: pointer;
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 2px;
+    transition: transform 0.1s;
+}
+
+.start-event-btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow:
+        4px 4px 0 #0a220a,
+        inset -2px -2px 0 #116611,
+        inset 2px 2px 0 #55dd55;
+}
+
+.start-event-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow:
+        2px 2px 0 #0a220a,
+        inset -2px -2px 0 #116611,
+        inset 2px 2px 0 #55dd55;
+}
+
+/* ============================================
    HEADER
    ============================================ */
 

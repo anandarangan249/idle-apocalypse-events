@@ -73,7 +73,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: true,
             produces: 'sapphires',
-            spawnTime: 5000, // 5 seconds
+            spawnTime: 1000, // 1 second
 
             maxLevel: 10,
             productionByLevel: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -102,7 +102,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: false,
             produces: 'emeralds',
-            spawnTime: 10000, // 10 seconds
+            spawnTime: 2000, // 2 seconds
 
             maxLevel: 10,
             productionByLevel: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -131,7 +131,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: false,
             produces: 'sapphires',
-            spawnTime: 15000, // 15 seconds
+            spawnTime: 3000, // 3 seconds
 
             maxLevel: 10,
             productionByLevel: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -160,7 +160,7 @@ const EVENT_CONFIG = {
 
             unlockedByDefault: false,
             produces: 'rubies',
-            spawnTime: 20000, // 20 seconds
+            spawnTime: 4000, // 4 seconds
 
             maxLevel: 10,
             productionByLevel: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],

@@ -456,21 +456,22 @@ class IdleEventEngine {
     }
 
     updateTimer() {
+        const timerEl = document.getElementById('event-timer');
+        if (!timerEl) return;
+
         if (!this.state.eventStartTime) {
-            this.state.eventStartTime = Date.now();
+            timerEl.textContent = this.formatTime(this.config.duration);
+            return;
         }
 
         const elapsed = Date.now() - this.state.eventStartTime;
         const remaining = Math.max(0, this.config.duration - elapsed);
 
-        const timerEl = document.getElementById('event-timer');
-        if (timerEl) {
+        if (remaining <= 0) {
+            timerEl.textContent = 'EVENT ENDED';
+            timerEl.style.color = '#888';
+        } else {
             timerEl.textContent = this.formatTime(remaining);
-
-            if (remaining <= 0) {
-                timerEl.textContent = 'EVENT ENDED';
-                timerEl.style.color = '#888';
-            }
         }
     }
 
@@ -592,32 +593,30 @@ class IdleEventEngine {
     // ENGINE CONTROL
     // ============================================
 
-    start(containerId) {
-        // Render the game
+    // Phase 1: render UI and load save — does NOT start loops
+    initialize(containerId) {
         this.renderGame(containerId);
-
-        // Load saved state
         this.loadGame();
-
-        // Setup event listeners
         this.setupEventListeners();
-
-        // Initial UI update
         this.updateUI();
         this.updateTimer();
+    }
 
-        // Start game loop
+    // Phase 2: start the game loops (call after player confirms via popup)
+    beginEventLoop() {
+        if (!this.state.eventStartTime) {
+            this.state.eventStartTime = Date.now();
+        }
+
         const tickRate = this.config.settings.tickRate || 60;
         this.intervals.push(
             setInterval(() => this.gameLoop(), 1000 / tickRate)
         );
 
-        // Timer update
         this.intervals.push(
             setInterval(() => this.updateTimer(), 1000)
         );
 
-        // Auto-save
         const saveInterval = this.config.settings.saveInterval || 30000;
         this.intervals.push(
             setInterval(() => this.saveGame(), saveInterval)
@@ -625,6 +624,12 @@ class IdleEventEngine {
 
         this.isRunning = true;
         console.log(`${this.config.name} event started!`);
+    }
+
+    // Combined: initialize + begin (kept for convenience)
+    start(containerId) {
+        this.initialize(containerId);
+        this.beginEventLoop();
     }
 
     stop() {
@@ -635,22 +640,3 @@ class IdleEventEngine {
         console.log(`${this.config.name} event stopped.`);
     }
 }
-
-// ============================================
-// INITIALIZATION
-// ============================================
-
-// Global game instance
-let game = null;
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Check if EVENT_CONFIG is defined (loaded from event config file)
-    if (typeof EVENT_CONFIG === 'undefined') {
-        console.error('EVENT_CONFIG not found! Make sure to load an event config file before game.js');
-        return;
-    }
-
-    // Create and start the game
-    game = new IdleEventEngine(EVENT_CONFIG);
-    game.start('game-container');
-});
