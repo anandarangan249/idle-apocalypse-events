@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# RL training artefacts
+rl_agent/logs/
+rl_agent/trained_model.zip
+
+# OS
+.DS_Store
+Thumbs.db
