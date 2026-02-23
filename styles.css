@@ -314,6 +314,138 @@ body {
 }
 
 /* ============================================
+   TIME CONTROLS
+   ============================================ */
+
+.time-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.pause-play-btn {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(180deg, #225599 0%, #113366 100%);
+    border: 3px solid #4488cc;
+    box-shadow:
+        3px 3px 0 #0a1a33,
+        inset -2px -2px 0 #113366,
+        inset 2px 2px 0 #4477bb;
+    color: #fff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+}
+
+.pause-play-btn:hover {
+    transform: translate(1px, 1px);
+    box-shadow:
+        2px 2px 0 #0a1a33,
+        inset -2px -2px 0 #113366,
+        inset 2px 2px 0 #4477bb;
+}
+
+.pause-play-btn.is-paused {
+    background: linear-gradient(180deg, #228844 0%, #115522 100%);
+    border-color: #44cc66;
+    box-shadow:
+        3px 3px 0 #0a220a,
+        inset -2px -2px 0 #116633,
+        inset 2px 2px 0 #44bb66;
+}
+
+.speed-btns {
+    display: flex;
+    gap: 3px;
+}
+
+.speed-btn {
+    padding: 6px 8px;
+    background: linear-gradient(180deg, #1a1a3a 0%, #0d0d1e 100%);
+    border: 3px solid #334466;
+    box-shadow:
+        3px 3px 0 #050510,
+        inset -1px -1px 0 #223355,
+        inset 1px 1px 0 #334477;
+    color: #667799;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.38em;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.speed-btn:hover {
+    color: #aabbcc;
+    transform: translate(1px, 1px);
+    box-shadow:
+        2px 2px 0 #050510,
+        inset -1px -1px 0 #223355,
+        inset 1px 1px 0 #334477;
+}
+
+.speed-btn.active {
+    background: linear-gradient(180deg, #334488 0%, #1a2255 100%);
+    border-color: #6699cc;
+    box-shadow:
+        3px 3px 0 #0a1133,
+        inset -1px -1px 0 #223377,
+        inset 1px 1px 0 #5588bb;
+    color: #aaddff;
+}
+
+.skip-controls {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.skip-label {
+    font-size: 0.35em;
+    color: #778899;
+    margin-right: 2px;
+}
+
+.skip-btn {
+    padding: 6px 8px;
+    background: linear-gradient(180deg, #2a1a00 0%, #150d00 100%);
+    border: 3px solid #664400;
+    box-shadow:
+        3px 3px 0 #0a0500,
+        inset -1px -1px 0 #3a2200,
+        inset 1px 1px 0 #886633;
+    color: #cc9944;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.36em;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.skip-btn:hover {
+    color: #ffcc66;
+    transform: translate(1px, 1px);
+    box-shadow:
+        2px 2px 0 #0a0500,
+        inset -1px -1px 0 #3a2200,
+        inset 1px 1px 0 #886633;
+}
+
+.skip-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow:
+        1px 1px 0 #0a0500,
+        inset -1px -1px 0 #3a2200,
+        inset 1px 1px 0 #886633;
+}
+
+/* ============================================
    RESOURCES BAR
    ============================================ */
 

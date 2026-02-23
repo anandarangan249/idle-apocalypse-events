@@ -12,6 +12,8 @@ class IdleEventEngine {
         this.boostStates = this.createBoostStates();
         this.intervals = [];
         this.isRunning = false;
+        this.timeScale = 1;
+        this.isPaused = false;
     }
 
     // ============================================
@@ -28,6 +30,7 @@ class IdleEventEngine {
             resources,
             totalDamage: 0,
             eventStartTime: null,
+            simulatedElapsed: 0,
             lastUpdate: Date.now()
         };
     }
@@ -334,15 +337,23 @@ class IdleEventEngine {
 
     gameLoop() {
         const now = Date.now();
-        const deltaTime = now - this.state.lastUpdate;
+        const realDelta = now - this.state.lastUpdate;
         this.state.lastUpdate = now;
 
-        // Process all creatures
+        if (this.isPaused) return;
+
+        const remaining = this.config.duration - this.state.simulatedElapsed;
+        if (remaining <= 0) return;
+
+        const simDelta = Math.min(realDelta * this.timeScale, remaining);
+        this.state.simulatedElapsed += simDelta;
+
         this.config.creatures.forEach(creature => {
-            this.processCreature(creature.id, deltaTime);
+            this.processCreature(creature.id, simDelta);
         });
 
         this.updateUI();
+        this.updateTimer();
     }
 
     // ============================================
@@ -443,6 +454,22 @@ class IdleEventEngine {
                 <div class="timer-container">
                     <span class="timer-label">Time Remaining:</span>
                     <span id="event-timer" class="timer">${this.formatTime(this.config.duration)}</span>
+                </div>
+                <div class="time-controls">
+                    <button id="pause-btn" class="pause-play-btn" title="Pause / Resume">⏸</button>
+                    <div class="speed-btns">
+                        <button class="speed-btn active" data-speed="1">1×</button>
+                        <button class="speed-btn" data-speed="1.5">1.5×</button>
+                        <button class="speed-btn" data-speed="2">2×</button>
+                        <button class="speed-btn" data-speed="4">4×</button>
+                    </div>
+                    <div class="skip-controls">
+                        <span class="skip-label">Skip:</span>
+                        <button class="skip-btn" data-skip="60000">+1m</button>
+                        <button class="skip-btn" data-skip="300000">+5m</button>
+                        <button class="skip-btn" data-skip="1800000">+30m</button>
+                        <button class="skip-btn" data-skip="3600000">+1h</button>
+                    </div>
                 </div>
                 <button id="reset-btn" class="reset-btn" title="Restart Event">Restart</button>
             </header>
@@ -684,8 +711,7 @@ class IdleEventEngine {
             return;
         }
 
-        const elapsed = Date.now() - this.state.eventStartTime;
-        const remaining = Math.max(0, this.config.duration - elapsed);
+        const remaining = Math.max(0, this.config.duration - this.state.simulatedElapsed);
 
         if (remaining <= 0) {
             timerEl.textContent = 'EVENT ENDED';
@@ -708,6 +734,7 @@ class IdleEventEngine {
             resources: this.state.resources,
             totalDamage: this.state.totalDamage,
             eventStartTime: this.state.eventStartTime,
+            simulatedElapsed: this.state.simulatedElapsed,
             lastSaveTime: Date.now(),
             creatures: this.creatureStates,
             boosts: this.boostStates
@@ -734,6 +761,15 @@ class IdleEventEngine {
 
             this.state.totalDamage = data.totalDamage || 0;
             this.state.eventStartTime = data.eventStartTime || null;
+            if (data.simulatedElapsed !== undefined) {
+                this.state.simulatedElapsed = data.simulatedElapsed;
+            } else if (data.eventStartTime) {
+                // Migrate old saves that tracked real wall-clock time
+                this.state.simulatedElapsed = Math.min(
+                    Date.now() - data.eventStartTime,
+                    this.config.duration
+                );
+            }
 
             // Load creature states
             if (data.creatures) {
@@ -772,12 +808,14 @@ class IdleEventEngine {
     processOfflineProgress(offlineTime) {
         const maxOffline = this.config.settings.maxOfflineTime;
         const processTime = Math.min(offlineTime, maxOffline);
+        const remaining = Math.max(0, this.config.duration - this.state.simulatedElapsed);
+        const actualTime = Math.min(processTime, remaining);
 
         this.config.creatures.forEach(creature => {
             const state = this.getCreatureState(creature.id);
             if (!state.unlocked || state.level === 0) return;
 
-            const ticks = Math.floor(processTime / this.getEffectiveSpawnTime(creature));
+            const ticks = Math.floor(actualTime / this.getEffectiveSpawnTime(creature));
             const production = this.getCreatureProduction(creature.id) * ticks;
             const damage = this.getCreatureDamage(creature.id) * ticks;
 
@@ -785,8 +823,10 @@ class IdleEventEngine {
             this.state.totalDamage += damage;
         });
 
-        if (processTime > 60000) {
-            console.log(`Processed ${Math.floor(processTime / 1000)}s of offline progress`);
+        this.state.simulatedElapsed += actualTime;
+
+        if (actualTime > 60000) {
+            console.log(`Processed ${Math.floor(actualTime / 1000)}s of offline progress`);
         }
     }
 
@@ -829,6 +869,20 @@ class IdleEventEngine {
                 }
             });
         }
+
+        // Pause / resume
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) pauseBtn.addEventListener('click', () => this.togglePause());
+
+        // Speed buttons
+        document.querySelectorAll('.speed-btn').forEach(btn => {
+            btn.addEventListener('click', () => this.setTimeScale(parseFloat(btn.dataset.speed)));
+        });
+
+        // Skip buttons
+        document.querySelectorAll('.skip-btn').forEach(btn => {
+            btn.addEventListener('click', () => this.skipTime(parseInt(btn.dataset.skip)));
+        });
     }
 
     // ============================================
@@ -855,10 +909,6 @@ class IdleEventEngine {
             setInterval(() => this.gameLoop(), 1000 / tickRate)
         );
 
-        this.intervals.push(
-            setInterval(() => this.updateTimer(), 1000)
-        );
-
         const saveInterval = this.config.settings.saveInterval || 30000;
         this.intervals.push(
             setInterval(() => this.saveGame(), saveInterval)
@@ -872,6 +922,40 @@ class IdleEventEngine {
     start(containerId) {
         this.initialize(containerId);
         this.beginEventLoop();
+    }
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        if (!this.isPaused) {
+            this.state.lastUpdate = Date.now(); // prevent large delta on resume
+        }
+        const btn = document.getElementById('pause-btn');
+        if (btn) {
+            btn.textContent = this.isPaused ? '▶' : '⏸';
+            btn.classList.toggle('is-paused', this.isPaused);
+        }
+    }
+
+    setTimeScale(scale) {
+        this.timeScale = scale;
+        document.querySelectorAll('.speed-btn').forEach(btn => {
+            btn.classList.toggle('active', parseFloat(btn.dataset.speed) === scale);
+        });
+    }
+
+    skipTime(ms) {
+        const remaining = Math.max(0, this.config.duration - this.state.simulatedElapsed);
+        const skipMs = Math.min(ms, remaining);
+        if (skipMs <= 0) return;
+
+        this.config.creatures.forEach(creature => {
+            this.processCreature(creature.id, skipMs);
+        });
+
+        this.state.simulatedElapsed += skipMs;
+        this.updateUI();
+        this.updateTimer();
+        this.saveGame();
     }
 
     stop() {
